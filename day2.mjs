@@ -3,7 +3,7 @@
 import { readFile } from 'node:fs/promises';
 
 const input = await readFile('./inputs/day2.txt', 'utf-8');
-const data = input.split(',').map(range => {
+const invalidSum = input.split(',').map(range => {
   const [ lower, upper ] = range.split('-');
   const invalids = [];
 
@@ -23,4 +23,4 @@ const data = input.split(',').map(range => {
   return sum + invalids.reduce((s, v) => s + v, 0);
 }, 0);
 
-console.log(data);
+console.log(invalidSum);
