@@ -39,8 +39,8 @@ const part2 = (input) => {
                       .map(row => row.split('-').map(Number))
                       .sort((a, b) => a[0] - b[0]);
   const result = [];
-  let lower = sorted[0][0];
-  let upper = sorted[0][1];
+  let lower = ranges[0][0];
+  let upper = ranges[0][1];
 
   for (let i = 1; i < ranges.length; i++) {
     const current = ranges[i];
