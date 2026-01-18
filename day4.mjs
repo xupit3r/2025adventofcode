@@ -1,21 +1,11 @@
 #!/usr/bin/env node
 
-import { count } from 'node:console';
 import { readFile } from 'node:fs/promises';
 
 const input = await readFile('./inputs/day4.txt', 'utf-8');
-// const input = `..@@.@@@@.
-// @@@.@.@.@@
-// @@@@@.@.@@
-// @.@@@@..@.
-// @@.@@@@.@@
-// .@@@@@@@.@
-// .@.@.@.@@@
-// @.@@@.@@@@
-// .@@@@@@@@.
-// @.@.@@@.@.`;
 
 const PAPER_ROLL = '@';
+const RETRIEVED_ROLL = 'x';
 
 const neighbors = [
   [0, 1],
@@ -50,6 +40,24 @@ const countRolls = (i, j, grid) => {
   }, 0);
 }
 
+const findAndReplace = (total, grid) => {
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[0].length; j++) {
+      const count = countRolls(i, j, grid);
+
+      if (grid[i][j] === PAPER_ROLL && count < 4) {
+        grid[i][j] = RETRIEVED_ROLL;
+        total++;
+      }
+    }
+  }
+
+  return {
+    grid,
+    total
+  }
+}
+
 const part1 = (input) => {
   const grid = input.split('\n').map(row => row.split(''));
   let total = 0;
@@ -67,4 +75,20 @@ const part1 = (input) => {
   return total;
 }
 
-console.log(part1(input));
+const part2 = (input) => {
+  let grid = input.split('\n').map(row => row.split(''));
+  let total = 0;
+  let previous = 0;
+  let result;
+
+  do {
+    previous = total;
+    result = findAndReplace(total, grid);
+    total = result.total;
+    grid = result.grid;
+  } while (previous !== total);
+
+  return total;
+}
+
+console.log(part2(input));
