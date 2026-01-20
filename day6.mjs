@@ -3,10 +3,6 @@
 import { readFile } from 'node:fs/promises';
 
 const input = await readFile('./inputs/day6.txt', 'utf-8');
-// const input = `123 328  51 64 
-//  45 64  387 23 
-//   6 98  215 314
-// *   +   *   +`;
 
 const sum = (s, v) => s + v;
 const product = (s, v) => s * v;
@@ -29,4 +25,39 @@ const part1 = (input) => {
   return results.reduce(sum);
 }
 
-console.log(part1(input));
+const part2 = (input) => {
+  const rows = input.split('\n');
+  const operators = rows.pop().split(/\s+/);
+  const results = [];
+
+  for (let i = 0; i < rows[0].length; i++) {
+    results[i] = [];
+
+    for (let j = 0; j < rows.length; j++) {
+      results[i][j] = rows[j][i];
+    }
+  }
+
+  // trailing space to make the rest of this work
+  results.push(['']);
+
+  let equation = [];
+  let total = 0;
+  for (let i = 0; i < results.length; i++) {
+    const str = results[i].join('').trim();
+
+    if (!str.length) {
+      total += (operators.shift() === '+'
+        ? equation.reduce(sum, 0)
+        : equation.reduce(product, 1)
+      );
+      equation = [];
+    } else {
+      equation.push(Number(str));
+    }
+  }
+
+  return total;
+}
+
+console.log(part2(input));
