@@ -80,4 +80,32 @@ const part1 = (data) => {
   return sizes.sort((a, b) => b - a).slice(0, 3).reduce((p, v) => p * v, 1);
 };
 
-console.log(part1(input));
+const part2 = (data) => {
+  const boxes = data.split('\n').map(row => row.split(',').map(Number));
+  const connections = buildConnections(boxes);
+  const circuits = buildCircuits(boxes);
+
+  let result = 0;
+  let found = false;
+  let idx = 0;
+
+  while (!found) {
+    const [ a, b ] = connections[idx++];
+
+    if (!circuits[a].boxes.has(b)) {
+      circuits[b].boxes.forEach(box => {
+        circuits[a].boxes.add(box);
+        circuits[box] = circuits[a];
+      });
+
+      if (circuits[0].boxes.size === boxes.length) {
+        found = true;
+        result = boxes[a][0] * boxes[b][0];
+      }
+    }
+  }
+
+  return result;
+}
+
+console.log(part2(input));
