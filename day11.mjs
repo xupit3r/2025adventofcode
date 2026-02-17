@@ -3,16 +3,19 @@
 import { readFile } from 'node:fs/promises';
 
 const input = await readFile('./inputs/day11.txt', 'utf-8');
-// const input = `aaa: you hhh
-// you: bbb ccc
-// bbb: ddd eee
-// ccc: ddd eee fff
-// ddd: ggg
-// eee: out
-// fff: out
+// const input = `svr: aaa bbb
+// aaa: fft
+// fft: ccc
+// bbb: tty
+// tty: ccc
+// ccc: ddd eee
+// ddd: hub
+// hub: fff
+// eee: dac
+// dac: fff
+// fff: ggg hhh
 // ggg: out
-// hhh: ccc fff iii
-// iii: out`;
+// hhh: out`;
 
 const parse = (data) => {
   return data.split(/\n/).map(line => {
@@ -22,39 +25,44 @@ const parse = (data) => {
       name: parts[0].slice(0, -1),
       siblings: parts.slice(1)
     };
-  });
+  }).reduce((m, d) => {
+    m.set(d.name, d);
+    return m;
+  }, new Map());
 }
 
-const paths = (device, graph, current=[], all=new Map(), visited=new Set()) => {
-  const key = current.join('->');
+const dfs = (device, graph, current=[], visited=new Set(), all=new Map()) => {
+  current.push(device);
+  visited.add(device);
 
-  if (!device) {
-    all.set(key, current);
-    return;
-  }
+  if (device === 'out') {
+    all.set(current.join('->'), current.slice());
+  } else {
+    const { siblings } = graph.get(device);  
 
-  if (!visited.has(device.name)) {
-    current.push(device.name);
-    visited.add(device.name);
-
-    for (let i = 0; i < device.siblings.length; i++) {
-      paths(graph.get(device.siblings[i]), graph, current, all);
+    for (let i = 0; i < siblings.length; i++) {
+      const sibling = siblings[i];
+      
+      if (!visited.has(sibling)) {
+        dfs(sibling, graph, current, visited, all);
+      }
     }
-
-    visited.delete(device.name);
   }
+
+  visited.delete(device);
+  current.pop();
 
   return all;
 }
 
-const part1 = (data) => {
-  const devices = parse(data);
-  const graph = devices.reduce((m, d) => {
-    m.set(d.name, d);
-    return m;
-  }, new Map());
+const part1 = (data) => dfs('you', parse(data)).size;
 
-  return paths(graph.get('you'), graph).size;
+const part2 = (data) => {
+  const graph =  parse(data);
+  return [...dfs('svr', graph).values()].filter(val => {
+    const nodes = new Set(val);
+    return (nodes.has('dac') && nodes.has('fft'));
+  }).length;
 }
 
 console.log(part1(input));
