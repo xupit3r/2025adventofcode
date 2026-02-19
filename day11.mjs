@@ -68,7 +68,7 @@ const bfs = (start, getNeighbors) => {
   return reached;
 };
 
-const dfs = (start, end, requiredNodes, graph) => {
+const dfs = (start, end, graph) => {
   const reverseGraph = reverse(graph);
 
   const fwd = (node) => graph.has(node) ? graph.get(node).siblings : [];
@@ -111,9 +111,9 @@ const part2 = (data) => {
   const graph = parse(data);
 
   // break it up into graph sectiopns
-  const sf = dfs('svr', 'fft', [], graph);
-  const fd = dfs('fft', 'dac', [], graph);
-  const ds = dfs('dac', 'out', [], graph);
+  const sf = dfs('svr', 'fft', graph);
+  const fd = dfs('fft', 'dac', graph);
+  const ds = dfs('dac', 'out', graph);
 
   // result is the product of all section sizes
   return sf.length * fd.length * ds.length;
