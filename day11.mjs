@@ -31,38 +31,92 @@ const parse = (data) => {
   }, new Map());
 }
 
-const dfs = (device, graph, current=[], visited=new Set(), all=new Map()) => {
-  current.push(device);
-  visited.add(device);
+const reverse = (graph) => {
+  const rev = new Map();
 
-  if (device === 'out') {
-    all.set(current.join('->'), current.slice());
-  } else {
-    const { siblings } = graph.get(device);  
+  for (const [name, { siblings }] of graph) {
 
-    for (let i = 0; i < siblings.length; i++) {
-      const sibling = siblings[i];
-      
-      if (!visited.has(sibling)) {
-        dfs(sibling, graph, current, visited, all);
+    if (!rev.has(name)) { 
+      rev.set(name, []);
+    }
+
+    for (const sib of siblings) {
+      if (!rev.has(sib)) {
+        rev.set(sib, []);
+      }
+
+      rev.get(sib).push(name);
+    }
+  }
+  return rev;
+};
+
+const bfs = (start, getNeighbors) => {
+  const reached = new Set([start]);
+  const queue = [start];
+
+  while (queue.length) {
+    const node = queue.shift();
+
+    for (const n of getNeighbors(node)) {
+      if (!reached.has(n)) {
+        reached.add(n);
+        queue.push(n);
       }
     }
   }
+  return reached;
+};
 
-  visited.delete(device);
-  current.pop();
+const dfs = (start, end, requiredNodes, graph) => {
+  const reverseGraph = reverse(graph);
 
-  return all;
+  const fwd = (node) => graph.has(node) ? graph.get(node).siblings : [];
+  const rev = (node) => reverseGraph.get(node) || [];
+
+  // Only consider nodes reachable from start that can also reach end
+  const fromStart = bfs(start, fwd);
+  const toEnd = bfs(end, rev);
+  const relevant = new Set([...fromStart].filter(n => toEnd.has(n)));
+
+  const allPaths = [];
+  const visited = new Set();
+  const path = [];
+
+  const dive = (node) => {
+    path.push(node);
+    visited.add(node);
+
+    if (node === end) {
+      allPaths.push(path.slice());
+    } else {
+      for (const sib of fwd(node)) {
+        if (!(visited.has(sib) || !relevant.has(sib))) {
+          dive(sib);
+        }
+      }
+    }
+
+    visited.delete(node);
+    path.pop();
+  };
+
+  dive(start);
+  return allPaths;
 }
 
-const part1 = (data) => dfs('you', parse(data)).size;
+const part1 = (data) => dfs('you', 'out', [], parse(data)).length;
 
 const part2 = (data) => {
-  const graph =  parse(data);
-  return [...dfs('svr', graph).values()].filter(val => {
-    const nodes = new Set(val);
-    return (nodes.has('dac') && nodes.has('fft'));
-  }).length;
+  const graph = parse(data);
+
+  // break it up into graph sectiopns
+  const sf = dfs('svr', 'fft', [], graph);
+  const fd = dfs('fft', 'dac', [], graph);
+  const ds = dfs('dac', 'out', [], graph);
+
+  // result is the product of all section sizes
+  return sf.length * fd.length * ds.length;
 }
 
-console.log(part1(input));
+console.log(part2(input));
