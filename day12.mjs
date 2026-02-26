@@ -42,10 +42,10 @@ const parse = (data) => {
   const lines = data.split('\n');
 
   let stack = [];
-  const objs = [];
+  const shapes = [];
   lines.forEach(line => {
     if (!line.trim()) {
-      objs.push(stack.slice(1));
+      shapes.push(stack.slice(1));
       stack = [];
     } else {
       stack.push(line);
@@ -53,65 +53,76 @@ const parse = (data) => {
   });
 
   return {
-    presents: objs.map(obj => {
-      return obj.map(line => line.split('').map(t => t === '#' ? 1 :0))}
-    ),
+    presents: shapes.map(shape => {
+      return shape.map((line, x) => {
+        return line.split('').map((token, y) => {
+          if (token === '#') {
+            return [ x, y ]
+          } else {
+            return false
+          }
+        }).filter(v => v);
+      }).reduce((arr, line) => arr.concat(line), []);
+    }),
     trees: stack.map(line => {
       const parts = line.split(/\s+/);
+      const bins = parts.slice(1).map(Number);
+      const dimensions = parts[0].slice(0, -1).split('x').map(Number);
+      const grid = (new Array(dimensions[0])).fill([]).map(() => {
+        return new Array(dimensions[1]).fill('.');
+      });
+
       return {
-        dimensions: parts[0].slice(0, -1).split('x').map(Number),
-        bins: parts.slice(1).map(Number)
+        dimensions,
+        grid,
+        bins
       }
     })
   };
 }
 
-const centroider = (points) => {
-  const dimensions = points[0].length;
-  const accumulation = points.reduce((acc, point) => {
-    point.forEach((dimension, idx) => {
-      acc[idx] += dimension;
-    });
-
-    return acc;
-  }, Array(dimensions).fill(0));
-
-  return accumulation.map(dimension => dimension / points.length);
-}
-
-const rotate = (shape, degree = 90) => {
-  const points = shape.reduce((all, arr) => all.concat(arr), []).filter(v => v);
-  const [ cx, cy ] = centroider(points);
+const max = (pts) => Math.max.apply(Math.max, pts);
+const min = (pts) => Math.min.apply(Math.min, pts);
+const simpleCenter = (points) => {
+  const xValues = points.map(pt => pt[0]);
+  const yValues = points.map(pt => pt[1]);
   
-  return shape.map(row => row.map(([x, y]) => {
-    return [
-      cx + (x - cx) * Math.cos(degree) - (y - cy) * Math.sin(degree),
-      cy + (y - cy) * Math.sin(degree) + (x - cx) * Math.cos(degree)
-    ];
-  }));
+  return [ 
+    min(xValues) + max(xValues) / 2, 
+    min(yValues) + max(yValues) / 2
+  ];
 }
 
-const place = (shape, xOffset = 0, yOffset = 0) => {
-  const placed = shape.slice();
+const rotate = (shape, [ cx, cy ]) => {
+  return shape.map(([ x, y ]) => {
+    const translated = [ x - cx, y - cy ];
+    const rotated = [ translated[1], -translated[0]];
+    
+    return [
+      rotated[0] + cx, 
+      rotated[1] + cy
+    ];
+  });
+};
 
-  for (let i = 0; i < placed.length; i++) {
-    for (let j = 0; j < placed[0].length; j++) {
-      if (placed[i][j] === 1) {
-        placed[i][j] = [i + xOffset, j + yOffset];
-      }
-    }
+const place = (grid, shape, xOffset = 0, yOffset = 0) => {
+  for (let i = 0; i < shape.length; i++) {
+    const newX = shape[i][0] + xOffset;
+    const newY = shape[i][1] + yOffset;
+
+    if (newX < grid.length && newY < grid[0].length) {
+      grid[newX][newY] = '#';
+    } 
   }
 
-  return placed;
+  return grid;
 }
 
 const part1 = (data) => {
   const { presents, trees } = parse(data);
 
-  console.log(place(presents[0], 2, 3));
-  console.log(rotate(place(presents[0], 2, 3)));
 
-  return trees;
+  return;
 }
 
 console.log(part1(input));
