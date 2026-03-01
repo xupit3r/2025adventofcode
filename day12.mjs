@@ -2,40 +2,40 @@
 
 import { readFile } from 'node:fs/promises';
 
-//const input = await readFile('./inputs/day12.txt', 'utf-8');
-const input = `0:
-###
-##.
-##.
+const input = await readFile('./inputs/day12.txt', 'utf-8');
+// const input = `0:
+// ###
+// ##.
+// ##.
 
-1:
-###
-##.
-.##
+// 1:
+// ###
+// ##.
+// .##
 
-2:
-.##
-###
-##.
+// 2:
+// .##
+// ###
+// ##.
 
-3:
-##.
-###
-##.
+// 3:
+// ##.
+// ###
+// ##.
 
-4:
-###
-#..
-###
+// 4:
+// ###
+// #..
+// ###
 
-5:
-###
-.#.
-###
+// 5:
+// ###
+// .#.
+// ###
 
-4x4: 0 0 0 0 2 0
-12x5: 1 0 1 0 2 2
-12x5: 1 0 1 0 3 2`;
+// 4x4: 0 0 0 0 2 0
+// 12x5: 1 0 1 0 2 2
+// 12x5: 1 0 1 0 3 2`;
 
 
 const parse = (data) => {
@@ -81,48 +81,26 @@ const parse = (data) => {
   };
 }
 
-const max = (pts) => Math.max.apply(Math.max, pts);
-const min = (pts) => Math.min.apply(Math.min, pts);
-const simpleCenter = (points) => {
-  const xValues = points.map(pt => pt[0]);
-  const yValues = points.map(pt => pt[1]);
-  
-  return [ 
-    min(xValues) + max(xValues) / 2, 
-    min(yValues) + max(yValues) / 2
-  ];
-}
+const gatherPresents = (tree, presents) => tree.bins.map((quantity, idx) => {
+    const shapes = [];
+    for (let i = 0; i < quantity; i++) {
+      shapes.push(presents[idx].slice());
+    }
 
-const rotate = (shape, [ cx, cy ]) => {
-  return shape.map(([ x, y ]) => {
-    const translated = [ x - cx, y - cy ];
-    const rotated = [ translated[1], -translated[0]];
-    
-    return [
-      rotated[0] + cx, 
-      rotated[1] + cy
-    ];
-  });
-};
+    return shapes;
+  }).reduce((arr, shapes) => arr.concat(shapes));
 
-const place = (grid, shape, xOffset = 0, yOffset = 0) => {
-  for (let i = 0; i < shape.length; i++) {
-    const newX = shape[i][0] + xOffset;
-    const newY = shape[i][1] + yOffset;
+const dopesItFit = (tree, presents) => {
+  const totalArea = tree.dimensions[0] * tree.dimensions[1];
+  const presentArea = gatherPresents(tree, presents).reduce((a, p) => a + p.length, 0);
 
-    if (newX < grid.length && newY < grid[0].length) {
-      grid[newX][newY] = '#';
-    } 
-  }
-
-  return grid;
+  return totalArea >= presentArea;
 }
 
 const part1 = (data) => {
   const { presents, trees } = parse(data);
-
-
-  return;
+  return trees.map(tree => dopesItFit(tree, presents))
+                           .reduce((count, v) => v ? ++count : count, 0);
 }
 
 console.log(part1(input));
