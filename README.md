@@ -5,7 +5,7 @@ This repository contains my solutions for Advent of Code 2025 implemented as ES 
 **Project:** Solutions for days 1–12 (one file per day).
 
 **Requirements:**
-- Node.js 18+ (or any Node that supports ES modules and top-level await)
+- Node.js 22+ (or any Node that supports ES modules and top-level await)
 
 **Run a single day**
 
