@@ -2,7 +2,7 @@
 
 This repository contains my solutions for Advent of Code 2025 implemented as ES modules.
 
-**Project:** Solutions for days 1–9 (one file per day).
+**Project:** Solutions for days 1–12 (one file per day).
 
 **Requirements:**
 - Node.js 18+ (or any Node that supports ES modules and top-level await)
@@ -34,6 +34,9 @@ for d in {1..9}; do "./day${d}.mjs"; done
 - [day7.mjs](day7.mjs) - Day 7 solution
 - [day8.mjs](day8.mjs) - Day 8 solution
 - [day9.mjs](day9.mjs) - Day 9 solution
+- [day10.mjs](day10.mjs) - Day 10 solution
+- [day11.mjs](day11.mjs) - Day 11 solution
+- [day12.mjs](day12.mjs) - Day 12 solution
 - inputs/ — puzzle input files (e.g., [inputs/day1.txt](inputs/day1.txt))
 
 **Add a new day**
